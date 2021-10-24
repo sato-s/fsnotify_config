@@ -1,33 +1,39 @@
 package main
 
 import (
-  "gopkg.in/yaml.v2"
+	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
-  "fmt"
 )
 
 type Config struct {
-  A int
-  B string
+	A        int
+	B        string
+	filename string
 }
 
-func NewConfig(filename string) (*Config) {
-	data, err := ioutil.ReadFile(filename)
-  if err != nil {
-    panic(err)
-  }
+func NewConfig(filename string) (*Config, error) {
+	config := &Config{filename: filename}
 
-  c := Config{}
+	if err := config.loadFile(); err != nil {
+		return nil, err
+	}
+	return config, nil
+}
+
+func (c *Config) loadFile() error {
+	data, err := ioutil.ReadFile(c.filename)
+	if err != nil {
+		return err
+	}
 	err = yaml.Unmarshal([]byte(data), &c)
-  if err != nil {
-    panic(err)
-  }
-  return &c
+	return err
 }
 
-func main(){
-  config := NewConfig("config.yaml")
-  fmt.Printf("%+v", config)
-
+func main() {
+	config, err := NewConfig("config.yaml")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v", config)
 }
-
